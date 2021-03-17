@@ -1,0 +1,19 @@
+version=0.1
+
+[default.build.parameters]
+use_container = true
+
+[default.package.parameters]
+region = "us-east-1"
+
+[default.deploy.parameters]
+region = "us-east-1"
+stack_name = "websocket-based-api"
+capabilities = "CAPABILITY_IAM"
+
+[default.local_start_api.parameters]
+host = "0.0.0.0"
+template = "template_fake_local_api.yaml"
+
+[default.local_invoke.parameters]
+env_vars = "env.json"

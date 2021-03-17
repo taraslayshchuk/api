@@ -1,0 +1,8 @@
+{
+  "requestContext": {
+    "connectionId": "",
+    "domainName": "host.docker.internal:3000",
+    "stage": "prod"
+  },
+  "body": "{\"action\":\"roll\"}"
+}

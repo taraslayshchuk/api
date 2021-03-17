@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Websocket-based API in AWS API Gateway
+
+
+Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda/
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      Timeout: 15
+      MemorySize: 128
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /prod/@connections/{connectionId+}
+            Method: post
+            RestApiId: !Ref Api
+      Policies:
+      - AWSLambdaBasicExecutionRole
