@@ -55,7 +55,7 @@ websocat wss://4m4jx88y0k.execute-api.us-east-1.amazonaws.com/prod
 {"action":"roll"}
 {"word": "truck"}
 ```
-## Workflow test example with multiple clients client:
+## Workflow test example with multiple clients:
 ```bash
 # First client
 $ websocat wss://4m4jx88y0k.execute-api.us-east-1.amazonaws.com/prod
