@@ -17,7 +17,7 @@ Resources:
       TableName: random-words-table
       PrimaryKey:
         Name: id
-        Type: N
+        Type: Number
       ProvisionedThroughput:
         ReadCapacityUnits: 10
         WriteCapacityUnits: 10
@@ -27,7 +27,7 @@ Resources:
       TableName: connections-table
       PrimaryKey:
         Name: connectionId
-        Type: S
+        Type: String
       ProvisionedThroughput:
         ReadCapacityUnits: 10
         WriteCapacityUnits: 10
@@ -173,4 +173,10 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref RollFunction
       Principal: apigateway.amazonaws.com
+
+
+Outputs:
+  WebSocketURI:
+    Description: The WSS Protocol URI to connect to
+    Value: !Sub 'wss://${WebsocketApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}'
 

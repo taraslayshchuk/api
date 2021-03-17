@@ -19,7 +19,8 @@ def _get_random_word_from_table(dynamodb):
     Retrieve a random word from Dynamo DB.
     """
     table = dynamodb.Table(WORDS_TABLE_NAME)
-    item_count = table.item_count
+    # item_count = table.item_count
+    item_count = table.scan(Select='COUNT').get('Count')
     random_id = random.randint(1, item_count)
     item = table.get_item(Key={'id': random_id})
     return item.get('Item').get('word')

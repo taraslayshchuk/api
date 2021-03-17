@@ -5,9 +5,13 @@ use_container = true
 
 [default.package.parameters]
 region = "us-east-1"
+s3_bucket = "cf-templates-1maztqw7qvxdj-us-east-1"
+s3_prefix = "websocket-based-api"
 
 [default.deploy.parameters]
 region = "us-east-1"
+s3_bucket = "cf-templates-1maztqw7qvxdj-us-east-1"
+s3_prefix = "websocket-based-api"
 stack_name = "websocket-based-api"
 capabilities = "CAPABILITY_IAM"
 

@@ -20,7 +20,7 @@ sam local start-api
 ./tools/create_tables.sh
 
 ```
-## Workflow test example:
+## Workflow test example locally:
 ```bash
 # Creating 10 connections
 for x in {1..10}; do ./tools/connect.sh; done
@@ -29,4 +29,62 @@ for x in {1..5}; do ./tools/roll.sh; done
 # Close connection by connection_id
 echo '{"requestContext": {"connectionId": "<CONNECTION_ID>"}}' > events/disconnect.json
 ./tools/disconnect.sh
+```
+
+## Build and deploy:
+```bash
+sam build && sam package && sam deploy
+```
+❗️**Note**: after first deployemnt or in case of stack redeployment you should:
+* Upload test data to DynamoDB
+```bash
+./tools/fill_table.sh
+
+```
+## Workflow test example with single client:
+```bash
+websocat wss://4m4jx88y0k.execute-api.us-east-1.amazonaws.com/prod
+{"action":"roll"}
+{"word": "banana"}
+{"action":"roll"}
+{"word": "car"}
+{"action":"roll"}
+{"word": "banana"}
+{"action":"roll"}
+{"word": "truck"}
+{"action":"roll"}
+{"word": "truck"}
+```
+## Workflow test example with multiple clients client:
+```bash
+# First client
+$ websocat wss://4m4jx88y0k.execute-api.us-east-1.amazonaws.com/prod
+{"action":"roll"}
+{"word": "truck"}
+{"action":"roll"}
+{"word": "car"}
+{"action":"roll"}
+{"word": "truck"}
+{"word": "banana"}
+{"word": "car"}
+{"word": "banana"}
+^C
+```
+```bash
+# Second client
+$ websocat wss://4m4jx88y0k.execute-api.us-east-1.amazonaws.com/prod
+{"word": "truck"}
+{"word": "car"}
+{"word": "truck"}
+{"action":"roll"}
+{"word": "banana"}
+{"action":"roll"}
+{"word": "car"}
+{"action":"roll"}
+{"word": "banana"}
+{"action":"roll"}
+{"word": "banana"}
+{"action":"roll"}
+{"word": "truck"}
+^C
 ```
