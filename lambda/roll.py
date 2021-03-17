@@ -25,40 +25,37 @@ def _get_random_word_from_table(dynamodb):
     return item.get('Item').get('word')
 
 
-def _send_to_connection(connection_id, data, event):
+def _send_to_connection(connection_id, data, dynamodb, gatewayapi):
     """
     Send data to open websocket connection.
     """
-    aws_params = dict(service_name='apigatewaymanagementapi',
-                      endpoint_url=f'https://{event["requestContext"]["domainName"]}/{event["requestContext"]["stage"]}'
-                      )
-    if os.environ.get('AWS_SAM_LOCAL'):
-        aws_params['endpoint_url'] = f'http://{event["requestContext"]["domainName"]}/{event["requestContext"]["stage"]}'
-    gatewayapi = AWS_SESSION.client(**aws_params)
+
     try:
         print(f'++ Sending data {data} to connection {connection_id}.')
         gatewayapi.post_to_connection(ConnectionId=connection_id, Data=json.dumps(data).encode('utf-8'))
     except ClientError as error:
         if error.response['ResponseMetadata']['HTTPStatusCode'] == 410:
             print(f'!! Found stale connection, deleting {connection_id}.')
-            aws_params = dict(service_name='dynamodb')
-            if os.environ.get('AWS_SAM_LOCAL'):
-                # local dynamodb
-                aws_params['endpoint_url'] = 'http://host.docker.internal:8000'
-            dynamodb = AWS_SESSION.resource(**aws_params)
             table = dynamodb.Table(CONNECTIONS_TABLE_NAME)
             table.delete_item(Key={'connectionId': connection_id})
     except Exception as error:
-        print(error)
+        print(f'!! {error}.')
 
 
 def lambda_handler(event, context):
-    aws_params = dict(service_name='dynamodb')
+    aws_db_params = dict(service_name='dynamodb')
+    aws_api_params = dict(service_name='apigatewaymanagementapi',
+                          endpoint_url=f'https://{event["requestContext"]["domainName"]}/{event["requestContext"]["stage"]}'
+                          )
     if os.environ.get('AWS_SAM_LOCAL'):
         # local dynamodb
-        aws_params['endpoint_url'] = 'http://host.docker.internal:8000'
+        aws_db_params['endpoint_url'] = 'http://host.docker.internal:8000'
+        # local fake api gateway
+        aws_api_params['endpoint_url'] = f'http://{event["requestContext"]["domainName"]}/{event["requestContext"]["stage"]}'
+    gatewayapi = AWS_SESSION.client(**aws_api_params)
+    dynamodb = AWS_SESSION.resource(**aws_db_params)
+
     # Getting all current connections
-    dynamodb = AWS_SESSION.resource(**aws_params)
     table = dynamodb.Table(CONNECTIONS_TABLE_NAME)
     connection_data = []
     try:
@@ -73,6 +70,6 @@ def lambda_handler(event, context):
 
     # Sending data to all connections
     data = {'word': word}
-    for _id in connections:
-        _send_to_connection(_id, data, event)
+    for connection in connections:
+        _send_to_connection(connection, data, dynamodb, gatewayapi)
     return {'body': 'Data sent.', 'statusCode': 200}
